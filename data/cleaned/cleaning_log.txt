@@ -1,0 +1,80 @@
+=== upi_transactions ===
+raw rows: 20400
+status values not in mapping: {}
+exact duplicate rows removed (post-normalization): 400
+txn_id still duplicated with differing content: 0
+cleaned rows: 20000
+  flagged is_negative_flag: 420
+  flagged amount_missing: 0
+  flagged timestamp_missing: 0
+  flagged mcc_missing: 2872
+  flagged utr_valid=False: 1000  (of which utr missing: 1000)
+  status distribution: {'SUCCESS': 17053, 'FAILED': 1955, 'PENDING': 992}
+  timestamp range: 2026-01-01 00:00:00 -> 2026-03-31 23:53:53
+
+=== kyc_records ===
+raw rows: 36400
+kyc_status values not in mapping: {}
+risk_segment values not in mapping: {}
+distinct cities after aliasing: ['Amritsar', 'Bengaluru', 'Chennai', 'Delhi', 'Hyderabad', 'Jaipur', 'Jalandhar', 'Kolkata', 'Lucknow', 'Ludhiana', 'Mumbai', 'Pune']
+exact duplicate rows removed (post-normalization): 486
+  user_id collisions with differing content: 12964 rows across 5970 ids -> kept best record, 6994 rows moved to kyc_records_id_conflicts.csv
+cleaned rows: 28920  (unique user_id: 28920)
+  flagged pan_valid=False: 3469  (of which pan missing: 1328)
+  flagged aadhaar_valid=False: 6815  (pre-masked: 2322, no digits at all: 1831)
+  flagged income_valid=False: 4216  (negative: 1210, missing: 3006)
+  flagged dob_missing: 2061
+  flagged signup_missing: 1932
+  kyc_status distribution: {'VERIFIED': 22380, 'PENDING': 4184, 'REJECTED': 2356}
+  risk_segment distribution: {'LOW': 16721, 'MEDIUM': 7799, 'HIGH': 2962, 'UNKNOWN': 1438}
+
+=== merchants_master ===
+raw rows: 6210
+merchant_status values not in mapping: {}
+business_type values not in mapping: {}
+merchant_category values not in mapping: {}
+exact duplicate rows removed (post-normalization): 118
+  merchant_id collisions with differing content: 3103 rows across 1354 ids -> kept best record, 1749 rows moved to merchants_master_id_conflicts.csv
+cleaned rows: 4343  (unique merchant_id: 4343)
+  flagged mcc_inferred: 464
+  flagged mcc_missing: 0
+  flagged ticket_size_negative: 358
+  flagged ticket_size_missing: 204
+  flagged settlement_account_missing: 1432
+  flagged onboarding_missing: 263
+  merchant_status distribution: {'ACTIVE': 3563, 'INACTIVE': 780}
+  merchant_category distribution: {'APPAREL': 474, 'TRANSPORT': 463, 'DEPARTMENT_STORE': 458, 'HOTEL': 444, 'TELECOM': 433, 'MISC_RETAIL': 427, 'GROCERY': 421, 'PHARMACY': 419, 'BOOKS_STATIONERY': 406, 'RESTAURANT': 398}
+
+=== chargebacks ===
+raw rows: 2884
+severity values not in mapping: {}
+resolution_status values not in mapping: {}
+channel values not in mapping: {}
+reason_code values not in mapping: {}
+exact duplicate rows removed (post-normalization): 84
+complaint_id still duplicated with differing content: 0
+cleaned rows: 2800
+  flagged disputed_amount_missing: 179
+  flagged disputed_amount_negative: 220
+  flagged txn_id_missing: 77
+  flagged reported_ts_missing: 203
+  flagged txn_ts_missing: 230
+  flagged bank_response_missing: 701
+  flagged reported_before_txn: 92
+  severity distribution: {'MEDIUM': 1024, 'LOW': 959, 'HIGH': 604, 'CRITICAL': 213}
+  resolution_status distribution: {'IN_PROGRESS': 599, 'PENDING_BANK': 458, 'REJECTED': 443, 'CLOSED': 442, 'OPEN': 435, 'RESOLVED': 423}
+  reason_category distribution: {'SERVICE_NOT_DELIVERED': 704, 'CUSTOMER_DISPUTE': 376, 'UNAUTHORIZED': 371, 'DUPLICATE_DEBIT': 352, 'ACCOUNT_TAKEOVER': 344, 'FRAUD': 327, 'AMOUNT_MISMATCH': 326}
+
+=== join key coverage (informational) ===
+tx.user_id in kyc: 32.4%
+tx.merchant_id in merchants: 48.2%
+cb.txn_id in tx: 93.1%  (missing txn_id: 77)
+cb.user_id in kyc: 31.6%
+cb.merchant_id in merchants: 46.4%
+FINDING: only 32.4% of transaction users exist in KYC and 48.2% of transaction merchants exist in the merchant master. This is a property of the raw data, not the cleaning: raw unique ids (kyc=28920, merchants=4343) match the cleaned tables exactly, so no entity was lost.
+
+=== summary ===
+upi_transactions   raw= 20400  cleaned= 20000  retained=98.0%
+kyc_records        raw= 36400  cleaned= 28920  retained=79.5%
+merchants_master   raw=  6210  cleaned=  4343  retained=69.9%
+chargebacks        raw=  2884  cleaned=  2800  retained=97.1%
