@@ -16,6 +16,7 @@ venv/
 # Data
 data/raw/*
 !data/raw/.gitkeep
+data/*.duckdb
 data/cleaned/*.duckdb
 data/cleaned/*.duckdb.wal
 
