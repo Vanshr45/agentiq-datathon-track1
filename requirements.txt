@@ -1,0 +1,6 @@
+pandas
+duckdb
+streamlit
+plotly
+rapidfuzz
+python-dateutil

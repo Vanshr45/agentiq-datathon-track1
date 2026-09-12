@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.env
+*.egg-info/
+.ipynb_checkpoints/
+
+# OS / editors
+.DS_Store
+.vscode/
+.idea/
+
+# Data
+data/raw/*
+!data/raw/.gitkeep
+data/cleaned/*.duckdb
+data/cleaned/*.duckdb.wal
+
+# Streamlit
+.streamlit/secrets.toml
