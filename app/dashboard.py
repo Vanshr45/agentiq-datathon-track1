@@ -8,9 +8,13 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import streamlit as st
+from dotenv import load_dotenv
 
 ROOT = Path(__file__).resolve().parent.parent
 DB_PATH = ROOT / "data" / "analytics.duckdb"
+load_dotenv(ROOT / ".env")
+sys.path.insert(0, str(ROOT / "agent"))
+from graph_agent import GraphAgent, AgentError, build_chart
 NO_KYC = "NO_KYC_RECORD"
 HIGH_RISK_MIN_CB = 5
 
@@ -32,6 +36,10 @@ st.markdown("""
 .callout .title { font-weight: 600; margin-bottom: .3rem; }
 .subtitle { color: #6b7280; margin-top: -.6rem; }
 .chart-sub { color: #4b5563; font-size: .88rem; margin: -.2rem 0 .4rem; }
+.ask-q { font-weight: 600; color: #111827; margin-bottom: .2rem; }
+.ask-meta { font-size: .78rem; color: #6b7280; margin-bottom: .4rem; }
+.ask-summary { border-left: 4px solid #64748b; background: #f8fafc; padding: .6rem .9rem; border-radius: 6px; font-size: .92rem; }
+.ask-note { border-left: 4px solid #dc2626; background: #fef2f2; padding: .5rem .9rem; border-radius: 6px; font-size: .82rem; color: #7f1d1d; margin-top: .4rem; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -99,7 +107,8 @@ def callout(text, kind="warn", title=None):
 # ---------------------------------------------------------------- sidebar navigation
 st.sidebar.title("Navigation")
 section = st.sidebar.radio("Section", [":material/dashboard: Overview", ":material/storefront: Merchant Risk",
-                                       ":material/person_search: User Risk", ":material/fact_check: Data Quality"],
+                                       ":material/person_search: User Risk", ":material/fact_check: Data Quality",
+                                       ":material/chat: Ask the data"],
                            label_visibility="collapsed")
 section = section.split(" ", 1)[1]
 st.sidebar.caption("TransOrg AgentIQ Datathon, Track 1")
@@ -119,7 +128,7 @@ st.markdown(f'<p class="subtitle">Transaction sample from {span.tx_lo:%d %b %Y} 
             unsafe_allow_html=True)
 
 with st.container(border=True):
-    top = st.columns([1, 1.6, 1.8])
+    top = st.columns([0.8, 1.7, 2.1])
     date_range = top[0].date_input("Date range", (span.lo, span.hi), min_value=span.lo, max_value=span.hi)
     sel_kyc = top[1].pills("KYC status", kyc_statuses, default=kyc_statuses, selection_mode="multi")
     sel_risk = top[2].pills("Risk segment", risk_segments, default=risk_segments, selection_mode="multi")
@@ -340,6 +349,67 @@ elif section == "User Risk":
         st.dataframe(clusters.style.apply(highlight_tight, axis=1).format({"total_amount": "{:,.0f}", "first_txn": lambda v: v.strftime("%Y-%m-%d %H:%M")}),
                      width="stretch", hide_index=True)
         st.caption(f"{len(clusters)} clusters, {int(clusters.txns_in_cluster.sum())} transactions; {int((clusters.span_hours < 24).sum())} span under 24 hours.")
+
+# ================================================================ ask the data
+elif section == "Ask the data":
+    st.subheader("Ask the data")
+    st.caption("Plain-English questions are turned into a read-only DuckDB query and a chart by Gemini. "
+               "Answers are limited to the cleaned tables and analytics views; the page filters above do not apply here.")
+
+    @st.cache_resource
+    def get_agent():
+        return GraphAgent(connect())
+
+    agent = get_agent()
+    if not agent.ready:
+        callout("No Gemini API key found. Copy .env.example to .env, set GEMINI_API_KEY, and restart the app.", kind="warn", title="Agent unavailable")
+        st.stop()
+
+    if "chat" not in st.session_state:
+        st.session_state.chat = []
+
+    examples = ["Show daily transaction volume trend.", "Which merchant has the highest chargeback count?",
+                "Compare chargebacks by severity level.", "Show disputes reported after 7 days."]
+    ex_cols = st.columns(len(examples))
+    picked = None
+    for col, ex in zip(ex_cols, examples):
+        if col.button(ex, width="stretch"):
+            picked = ex
+
+    question = st.chat_input("Ask a question about transactions, merchants, users or chargebacks") or picked
+    if question:
+        with st.spinner("Thinking..."):
+            try:
+                spec, df, summary, notes = agent.ask(question)
+                st.session_state.chat.append({"q": question, "spec": spec, "df": df, "summary": summary, "notes": notes})
+            except AgentError as e:
+                st.session_state.chat.append({"q": question, "error": str(e)})
+
+    for turn in reversed(st.session_state.chat):
+        with st.container(border=True):
+            st.markdown(f'<div class="ask-q">{turn["q"]}</div>', unsafe_allow_html=True)
+            if "error" in turn:
+                callout(turn["error"], kind="warn", title="Could not answer that")
+                continue
+            spec, df = turn["spec"], turn["df"]
+            st.markdown(f'<div class="ask-meta">{spec.chart_type} chart, {len(df)} rows. {spec.reasoning}</div>', unsafe_allow_html=True)
+            fig = build_chart(spec, df)
+            left, right = st.columns([1.6, 1])
+            with left:
+                if fig is not None:
+                    st.plotly_chart(fig, width="stretch")
+                else:
+                    st.dataframe(df, width="stretch", hide_index=True)
+            with right:
+                st.markdown(f'<div class="ask-summary">{turn["summary"]}</div>', unsafe_allow_html=True)
+                for n in turn["notes"]:
+                    st.markdown(f'<div class="ask-note">{n}</div>', unsafe_allow_html=True)
+                with st.expander("Query"):
+                    st.code(spec.sql, language="sql")
+                    if fig is not None:
+                        st.dataframe(df.head(50), width="stretch", hide_index=True)
+    if not st.session_state.chat:
+        st.info("Try one of the example questions above or type your own.")
 
 # ================================================================ data quality
 else:

@@ -35,3 +35,18 @@ streamlit run app/dashboard.py
 ```
 
 `data/analytics.duckdb` is gitignored; both the script and the dashboard regenerate it from the cleaned CSVs.
+
+## Ask the data (Gemini agent)
+
+The "Ask the data" section turns plain-English questions into a read-only DuckDB query and a Plotly chart using
+Gemini (`google-genai` SDK, `gemini-3.5-flash` by default with automatic fallback). It needs an API key:
+
+```bash
+cp .env.example .env   # then set GEMINI_API_KEY
+```
+
+On Streamlit Community Cloud, add `GEMINI_API_KEY` under the app's Settings > Secrets instead.
+
+Latency note: the agent runs on the Gemini free tier. A question normally takes 5 to 15 seconds (two model calls),
+but the free tier throttles to a few requests per minute and the model is sometimes reported as busy. When that
+happens the agent retries with backoff and falls back to a lighter model, so an answer can take up to about a minute.
