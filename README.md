@@ -2,15 +2,35 @@
 
 TransOrg AgentIQ Datathon — Track 1 (FinTech & BFSI). Built solo.
 
+<p align="center"> <a href="https://track1-fintech-dataset-files.vercel.app/"> <img src="https://img.shields.io/badge/LIVE_DASHBOARD-Open_App-2d5d4f?style=for-the-badge" alt="Live Dashboard"> </a> </p> <p align="center"> <b>Live dashboard:</b> <a href="https://track1-fintech-dataset-files.vercel.app/">track1-fintech-dataset-files.vercel.app</a><br> <b>Repository:</b> <a href="https://github.com/Vanshr45/agentiq-datathon-track1">github.com/Vanshr45/agentiq-datathon-track1</a> </p>
+
 ## What this actually is
 
-The brief was: here's a messy UPI transactions dataset, plus KYC records, merchant data, and chargeback complaints — clean it up, figure out where the fraud risk actually is, and build a dashboard that tells that story. So that's what this repo does. There's a data cleaning pipeline, an analytics layer sitting on DuckDB, a Next.js dashboard that runs DuckDB in the browser, and (as a bonus) a chat-style agent where you can ask questions in plain English and it'll pull the right chart.
+The brief was: here's a messy UPI transactions dataset, plus KYC records, merchant data, and chargeback complaints — clean it up, figure out where the fraud risk actually is, and build something that tells that story to someone who has to make decisions about it. So that's what this repo does. There's a data cleaning pipeline, an analytics layer sitting on DuckDB, an interactive dashboard, and (as a bonus) a chat-style agent where you can ask questions in plain English and it pulls the right chart.
 
-Live dashboard: **VERCEL_URL_PLACEHOLDER**
+Everything below is organized the same way I actually built it — in stages, matching the 4-layer structure the datathon asked for, plus the setup and polish work around it.
+
+## How the work breaks down
+
+| Stage | What it covers | Status |
+|---|---|---|
+| Stage 0 — Setup | Repo structure, environment, dependencies | Done |
+| Stage 1 — Data Rescue (Core) | Cleaning all 4 raw files: fixing IDs, amounts, dates, status values; handling duplicates and broken relationships | Done |
+| Stage 2 — Analytics Layer (Core) | DuckDB views for every business metric (revenue, chargeback ratio, risk scores), with every formula documented | Done |
+| Stage 3 — Executive Dashboard (Core) | Interactive dashboard — KPIs, filters, trend charts, high-risk merchant/user tables, a dedicated data-quality section | Done |
+| Stage 4 — Bonus: Agentic Graph AI | Natural-language question → validated SQL → correct chart type → plain-language summary, powered by Gemini | Done |
+| Stage 5 — Documentation & Polish | README, data dictionary, metrics reference, fresh-clone reproducibility check, demo materials | Done |
+
+This mirrors the datathon's own structure: Data Rescue and Analytics Layer and Executive Dashboard were the three core layers, and the Agentic Graph AI was the optional bonus layer on top. I did all four, plus the setup and documentation stages around them.
 
 ## How to run it locally
 
-Clone the repo, then:
+```
+git clone https://github.com/Vanshr45/agentiq-datathon-track1
+cd agentiq-datathon-track1
+```
+
+The data pipeline (Python — cleaning and analytics):
 
 ```
 python -m venv venv
@@ -18,30 +38,22 @@ source venv/bin/activate       # or venv\Scripts\activate on Windows
 pip install -r requirements.txt
 ```
 
-Then run the cleaning notebook in /notebooks/ top to bottom (this regenerates /data/cleaned/), then run:
+Run the cleaning notebook in /notebooks/ top to bottom (this regenerates /data/cleaned/), then:
 
 ```
 python notebooks/analytics_layer.py
 ```
 
-That builds analytics.duckdb (it's gitignored on purpose since it's just a build artifact — nothing stops you from regenerating it in a couple minutes). The dashboard doesn't read it directly: run
+Before running the cleaning notebook, place the 4 provided raw files (track1_upi_transactions.csv, track1_kyc_records.csv, track1_merchants_master.csv, track1_chargebacks.json) into /data/raw/ — this folder is empty in the repo since raw data isn't committed.
 
-```
-python notebooks/export_parquet.py
-```
-
-to turn /data/cleaned/ into the Parquet files under /public/data/ that the browser loads.
-
-The dashboard is a Next.js app. It needs Node 20+:
+The dashboard (Next.js — runs entirely in the browser via DuckDB-WASM, no backend server needed):
 
 ```
 npm install
 npm run dev
 ```
 
-Then open http://localhost:3000. All the analytics run inside your browser with DuckDB-WASM, so there's no database server to set up.
-
-For the "Ask the data" agent to work, you'll need a free Gemini API key from Google AI Studio. Copy .env.example to .env and drop your key in there — the key only ever lives on the server side of the app (a Next.js API route), it's never sent to the browser.
+For the "Ask the data" agent to work locally, you'll need a free Gemini API key from Google AI Studio. Add it as GEMINI_API_KEY in a .env.local file.
 
 ## Data dictionary
 
@@ -66,10 +78,9 @@ One more thing worth flagging: some individual merchant ratios go above 1.0 (one
 - /data/raw — the original files, untouched
 - /data/cleaned — normalized output + cleaning_log.txt (raw vs cleaned row counts, what got flagged and why)
 - /notebooks — the cleaning notebook and analytics_layer.py
-- /src — the Next.js dashboard (pages under /src/app, the Gemini API route at /src/app/api/ask, DuckDB-WASM and the SQL views under /src/lib)
-- /public/data — the cleaned data as Parquet, loaded by the browser
-- /agent — the original Python version of the natural language agent; its prompts and validation rules are mirrored in the Next.js app
+- /src/app, /src/components, /public/data — the Next.js dashboard and its bundled data
+- /src/app/api/ask — the Gemini-powered natural language agent endpoint
 - METRICS.md — exact formula for every metric on the dashboard
 - DATA_DICTIONARY.md — every column, explained
 
-Built as a solo submission, so if something looks like it could be more polished in one spot vs another, that's why — I prioritized getting the data quality right first, then the dashboard, then the bonus agent, in that order.
+Built as a solo submission, so if something looks like it could be more polished in one spot vs another, that's why — I prioritized getting the data quality right first, then the analytics layer, then the dashboard, then the bonus agent, in that order.
