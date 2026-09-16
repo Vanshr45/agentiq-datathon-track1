@@ -7,7 +7,7 @@ import { num } from "@/lib/format";
 type User = { user_id: string; chargeback_count: number; disputed_amount: number | null; merchants_disputed: number; kyc_status: string; risk_segment: string; pan_valid: boolean | null; aadhaar_valid: boolean | null; risk_reason: string };
 type Cluster = { user_id: string; txns_in_cluster: number; span_hours: number; total_amount: number; first_txn: number; txn_ids: string; kyc_status: string; risk_segment: string };
 
-const Flag = ({ v }: { v: boolean | null }) => v == null ? <span className="text-slate-400">-</span> : v ? <span className="text-green-700">valid</span> : <span className="font-medium text-red-700">invalid</span>;
+const Flag = ({ v }: { v: boolean | null }) => v == null ? <span className="text-slate-500">-</span> : v ? <span className="text-green-700">valid</span> : <span className="font-medium text-red-700">invalid</span>;
 
 export default function UserRisk() {
   const { filters } = useFilters();

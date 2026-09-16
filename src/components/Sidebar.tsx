@@ -23,14 +23,14 @@ export default function Sidebar() {
           return (
             <Link key={n.href} href={n.href}
               className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm ${active ? "bg-slate-100 font-semibold text-slate-900" : "text-slate-600 hover:bg-slate-50"}`}>
-              <span className="w-4 text-center text-xs text-slate-400">{n.icon}</span>
+              <span className="w-4 text-center text-xs text-slate-500">{n.icon}</span>
               {n.label}
             </Link>
           );
         })}
       </nav>
-      <div className="mt-8 text-xs text-slate-500">TransOrg AgentIQ Datathon, Track 1</div>
-      <div className="mt-2 text-xs text-slate-400">
+      <div className="mt-8 text-xs text-slate-600">TransOrg AgentIQ Datathon, Track 1</div>
+      <div className="mt-2 text-xs text-slate-600">
         {duck.status === "ready" ? "Data loaded in browser" : duck.status === "error" ? "Data failed to load" : duck.message + "..."}
       </div>
     </aside>

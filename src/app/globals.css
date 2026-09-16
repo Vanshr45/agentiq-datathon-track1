@@ -1,26 +1,36 @@
 @import "tailwindcss";
 
+/* single light theme. the dashboard's cards, tables and chart canvases are white by design, so the page
+   never follows the OS dark preference - otherwise inherited text goes light on white surfaces. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+  --background: #f8fafc;   /* slate-50  */
+  --surface: #ffffff;
+  --foreground: #0f172a;   /* slate-900 */
+  --text-muted: #475569;   /* slate-600, 7.6:1 on white */
+  --text-faint: #64748b;   /* slate-500, 4.8:1 on white - the lightest text allowed */
+  --line: #e2e8f0;         /* slate-200 */
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted: var(--text-muted);
+  --color-faint: var(--text-faint);
+  --color-line: var(--line);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: light;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+table, td, th {
+  color: inherit;
 }

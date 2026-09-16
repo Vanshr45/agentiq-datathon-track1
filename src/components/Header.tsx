@@ -13,7 +13,7 @@ function Chips({ label, options, value, onChange }: { label: string; options: st
           const on = value.includes(o);
           return (
             <button key={o} onClick={() => toggle(o)}
-              className={`rounded-full border px-2.5 py-0.5 text-xs transition ${on ? "border-red-300 bg-red-50 text-red-700" : "border-slate-200 bg-white text-slate-400 line-through"}`}>
+              className={`rounded-full border px-2.5 py-0.5 text-xs transition ${on ? "border-red-300 bg-red-50 text-red-700" : "border-slate-200 bg-white text-slate-500 line-through"}`}>
               {o}
             </button>
           );
@@ -41,7 +41,7 @@ export default function Header() {
             <div className="mb-1 text-xs font-medium text-slate-600">Date range</div>
             <div className="flex items-center gap-1 text-sm">
               <input type="date" value={filters.start} min="2026-01-01" max="2026-05-03" onChange={(e) => setFilters({ ...filters, start: e.target.value })} className="rounded border border-slate-200 px-2 py-1" />
-              <span className="text-slate-400">to</span>
+              <span className="text-slate-500">to</span>
               <input type="date" value={filters.end} min="2026-01-01" max="2026-05-03" onChange={(e) => setFilters({ ...filters, end: e.target.value })} className="rounded border border-slate-200 px-2 py-1" />
             </div>
           </div>
