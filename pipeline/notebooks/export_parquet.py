@@ -2,9 +2,9 @@
 from pathlib import Path
 import duckdb
 
-ROOT = Path(__file__).resolve().parent.parent
-SRC = ROOT / "data" / "cleaned"
-OUT = ROOT / "public" / "data"
+PIPELINE = Path(__file__).resolve().parent.parent
+SRC = PIPELINE / "data" / "cleaned"
+OUT = PIPELINE.parent / "public" / "data"
 OUT.mkdir(parents=True, exist_ok=True)
 
 FILES = {

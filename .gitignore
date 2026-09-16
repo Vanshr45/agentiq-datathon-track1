@@ -14,14 +14,10 @@ venv/
 .idea/
 
 # Data
-data/raw/*
-!data/raw/.gitkeep
-data/*.duckdb
-data/cleaned/*.duckdb
-data/cleaned/*.duckdb.wal
-
-# Streamlit
-.streamlit/secrets.toml
+pipeline/data/raw/*
+!pipeline/data/raw/.gitkeep
+pipeline/data/*.duckdb
+pipeline/data/*.duckdb.wal
 
 # Next.js
 /node_modules

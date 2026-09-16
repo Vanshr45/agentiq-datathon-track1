@@ -1,8 +1,8 @@
 # Data dictionary
 
-One row per column for every raw input and every cleaned output. Raw files live in `data/raw/` (not committed);
-cleaned files are in `data/cleaned/` and are produced by `notebooks/01_data_cleaning.ipynb` using the helpers in
-`notebooks/utils.py`. Row counts and per-flag counts are in `data/cleaned/cleaning_log.txt`.
+One row per column for every raw input and every cleaned output. Raw files live in `pipeline/data/raw/` (not committed);
+cleaned files are in `pipeline/data/cleaned/` and are produced by `pipeline/notebooks/01_data_cleaning.ipynb` using the helpers in
+`pipeline/notebooks/utils.py`. Row counts and per-flag counts are in `pipeline/data/cleaned/cleaning_log.txt`.
 
 Conventions used throughout the cleaned files:
 
@@ -198,8 +198,8 @@ more complete record. Same columns as the cleaned file. Not used by any join.
 
 ---
 
-## 5. Derived: `data/analytics.duckdb`
+## 5. Derived: `pipeline/data/analytics.duckdb`
 
-Built by `notebooks/analytics_layer.py` from the four cleaned files (plus the two conflict files, loaded for audit
+Built by `pipeline/notebooks/analytics_layer.py` from the four cleaned files (plus the two conflict files, loaded for audit
 only). Base tables are `transactions`, `kyc`, `merchants`, `chargebacks`, and a `join_coverage` table records the
 match rate of every join. The metric views and their formulas are documented in `METRICS.md`.

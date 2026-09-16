@@ -1,7 +1,7 @@
 # Metrics
 
 How each number in the analytics layer is computed, and the decisions behind it. Everything below lives as a
-DuckDB view in `data/analytics.duckdb`, built by `notebooks/analytics_layer.py` from the Stage 1 cleaned files.
+DuckDB view in `pipeline/data/analytics.duckdb`, built by `pipeline/notebooks/analytics_layer.py` from the Stage 1 cleaned files.
 Re-run the script to rebuild the database from scratch.
 
 ## Two things to know before reading any metric

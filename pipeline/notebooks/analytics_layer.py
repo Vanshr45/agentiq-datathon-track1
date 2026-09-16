@@ -2,9 +2,9 @@
 from pathlib import Path
 import duckdb
 
-ROOT = Path(__file__).resolve().parent.parent
-CLEANED = ROOT / "data" / "cleaned"
-DB_PATH = ROOT / "data" / "analytics.duckdb"
+PIPELINE = Path(__file__).resolve().parent.parent
+CLEANED = PIPELINE / "data" / "cleaned"
+DB_PATH = PIPELINE / "data" / "analytics.duckdb"
 
 # the *_id_conflicts files are loaded for audit only - nothing below joins against them
 TABLES = {

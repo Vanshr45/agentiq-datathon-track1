@@ -35,16 +35,17 @@ The data pipeline (Python — cleaning and analytics):
 ```
 python -m venv venv
 source venv/bin/activate       # or venv\Scripts\activate on Windows
-pip install -r requirements.txt
+pip install -r pipeline/requirements.txt
 ```
 
-Run the cleaning notebook in /notebooks/ top to bottom (this regenerates /data/cleaned/), then:
+Run the cleaning notebook in /pipeline/notebooks/ top to bottom (this regenerates /pipeline/data/cleaned/), then:
 
 ```
-python notebooks/analytics_layer.py
+python pipeline/notebooks/analytics_layer.py
+python pipeline/notebooks/export_parquet.py
 ```
 
-Before running the cleaning notebook, place the 4 provided raw files (track1_upi_transactions.csv, track1_kyc_records.csv, track1_merchants_master.csv, track1_chargebacks.json) into /data/raw/ — this folder is empty in the repo since raw data isn't committed.
+Before running the cleaning notebook, place the 4 provided raw files (track1_upi_transactions.csv, track1_kyc_records.csv, track1_merchants_master.csv, track1_chargebacks.json) into /pipeline/data/raw/ — this folder is empty in the repo since raw data isn't committed.
 
 The dashboard (Next.js — runs entirely in the browser via DuckDB-WASM, no backend server needed):
 
@@ -75,11 +76,14 @@ One more thing worth flagging: some individual merchant ratios go above 1.0 (one
 
 ## What's in each stage
 
-- /data/raw — the original files, untouched
-- /data/cleaned — normalized output + cleaning_log.txt (raw vs cleaned row counts, what got flagged and why)
-- /notebooks — the cleaning notebook and analytics_layer.py
-- /src/app, /src/components, /public/data — the Next.js dashboard and its bundled data
-- /src/app/api/ask — the Gemini-powered natural language agent endpoint
+- /pipeline/data/raw — the original files, untouched (not committed)
+- /pipeline/data/cleaned — normalized output + cleaning_log.txt (raw vs cleaned row counts, what got flagged and why)
+- /pipeline/notebooks — the cleaning notebook, analytics_layer.py, and export_parquet.py (writes the Parquet files the dashboard loads)
+- /pipeline/requirements.txt — Python dependencies for the pipeline
+- /src/app — the Next.js dashboard pages, plus the Gemini agent endpoint at /src/app/api/ask
+- /src/components — the UI pieces (sidebar, header and filters, KPI cards, charts)
+- /src/lib — DuckDB-WASM setup, the 12 SQL views, filter logic, and the agent's client-side SQL validation
+- /public/data — the cleaned data as Parquet, loaded by the browser
 - METRICS.md — exact formula for every metric on the dashboard
 - DATA_DICTIONARY.md — every column, explained
 
