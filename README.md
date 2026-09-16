@@ -4,9 +4,9 @@ TransOrg AgentIQ Datathon — Track 1 (FinTech & BFSI). Built solo.
 
 ## What this actually is
 
-The brief was: here's a messy UPI transactions dataset, plus KYC records, merchant data, and chargeback complaints — clean it up, figure out where the fraud risk actually is, and build a dashboard that tells that story. So that's what this repo does. There's a data cleaning pipeline, an analytics layer sitting on DuckDB, a Streamlit dashboard, and (as a bonus) a chat-style agent where you can ask questions in plain English and it'll pull the right chart.
+The brief was: here's a messy UPI transactions dataset, plus KYC records, merchant data, and chargeback complaints — clean it up, figure out where the fraud risk actually is, and build a dashboard that tells that story. So that's what this repo does. There's a data cleaning pipeline, an analytics layer sitting on DuckDB, a Next.js dashboard that runs DuckDB in the browser, and (as a bonus) a chat-style agent where you can ask questions in plain English and it'll pull the right chart.
 
-Live dashboard: **https://agentiq-datathon-track1.streamlit.app/**
+Live dashboard: **VERCEL_URL_PLACEHOLDER**
 
 ## How to run it locally
 
@@ -24,17 +24,24 @@ Then run the cleaning notebook in /notebooks/ top to bottom (this regenerates /d
 python notebooks/analytics_layer.py
 ```
 
-That builds analytics.duckdb (it's gitignored on purpose since it's just a build artifact — nothing stops you from regenerating it in a couple minutes).
-
-For the "Ask the data" agent to work, you'll need a free Gemini API key from Google AI Studio. Copy .env.example to .env and drop your key in there.
-
-Then run:
+That builds analytics.duckdb (it's gitignored on purpose since it's just a build artifact — nothing stops you from regenerating it in a couple minutes). The dashboard doesn't read it directly: run
 
 ```
-streamlit run app/dashboard.py
+python notebooks/export_parquet.py
 ```
 
-Heads up — the agent runs on Gemini's free tier, so a question usually takes 5–15 seconds to answer, but every once in a while (if Google's servers are busy) it can take up to a minute while it retries or falls back to a different model. That's expected, not a bug.
+to turn /data/cleaned/ into the Parquet files under /public/data/ that the browser loads.
+
+The dashboard is a Next.js app. It needs Node 20+:
+
+```
+npm install
+npm run dev
+```
+
+Then open http://localhost:3000. All the analytics run inside your browser with DuckDB-WASM, so there's no database server to set up.
+
+For the "Ask the data" agent to work, you'll need a free Gemini API key from Google AI Studio. Copy .env.example to .env and drop your key in there — the key only ever lives on the server side of the app (a Next.js API route), it's never sent to the browser.
 
 ## Data dictionary
 
@@ -59,8 +66,9 @@ One more thing worth flagging: some individual merchant ratios go above 1.0 (one
 - /data/raw — the original files, untouched
 - /data/cleaned — normalized output + cleaning_log.txt (raw vs cleaned row counts, what got flagged and why)
 - /notebooks — the cleaning notebook and analytics_layer.py
-- /app — the Streamlit dashboard
-- /agent — the Gemini-powered natural language agent
+- /src — the Next.js dashboard (pages under /src/app, the Gemini API route at /src/app/api/ask, DuckDB-WASM and the SQL views under /src/lib)
+- /public/data — the cleaned data as Parquet, loaded by the browser
+- /agent — the original Python version of the natural language agent; its prompts and validation rules are mirrored in the Next.js app
 - METRICS.md — exact formula for every metric on the dashboard
 - DATA_DICTIONARY.md — every column, explained
 
