@@ -18,8 +18,8 @@ export type ChartColors = { neutral: string; red: string; redDeep: string; green
 // server fallback only; in the browser the values come from the --chart-* custom properties in globals.css
 const FALLBACK: ChartColors = { neutral: "#64748b", red: "#dc2626", redDeep: "#7f1d1d", green: "#16a34a", light: "#cbd5e1", text: "#475569", grid: "#e2e8f0", surface: "#ffffff" };
 
-function readColors(): ChartColors {
-  if (typeof window === "undefined") return FALLBACK;
+function readColors(theme: string): ChartColors {
+  if (typeof window === "undefined" || !theme) return FALLBACK;
   const css = getComputedStyle(document.documentElement);
   const v = (name: string, fb: string) => css.getPropertyValue(name).trim() || fb;
   return { neutral: v("--chart-neutral", FALLBACK.neutral), red: v("--chart-red", FALLBACK.red), redDeep: v("--chart-red-deep", FALLBACK.redDeep),
@@ -30,8 +30,8 @@ function readColors(): ChartColors {
 // trace colours for the current theme; re-read whenever the toggle flips
 export function useChartColors(): ChartColors {
   const { theme } = useTheme();
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- theme is the invalidation key, the values live in CSS
-  return useMemo(readColors, [theme]);
+  // theme is the invalidation key; the values themselves live in CSS and change with the html class
+  return useMemo(() => readColors(theme), [theme]);
 }
 
 export const baseLayout = { margin: { l: 50, r: 20, t: 30, b: 40 }, font: { family: "inherit", size: 12 } };
@@ -48,6 +48,6 @@ export default function Plot(props: PlotParams) {
     title: { font: { color: c.text } },
     hoverlabel: { font: { color: c.text }, bgcolor: c.surface, bordercolor: c.grid },
   } }), [c]);
-  return <Plotly {...props} layout={{ template, ...props.layout }} useResizeHandler style={{ width: "100%", height: "100%" }}
+  return <Plotly {...props} layout={{ template, ...(props.layout ?? {}) }} useResizeHandler style={{ width: "100%", height: "100%" }}
     config={{ displaylogo: false, responsive: true, ...(props.config ?? {}) }} />;
 }
