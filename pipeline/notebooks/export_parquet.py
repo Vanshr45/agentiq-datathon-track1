@@ -4,7 +4,7 @@ import duckdb
 
 PIPELINE = Path(__file__).resolve().parent.parent
 SRC = PIPELINE / "data" / "cleaned"
-OUT = PIPELINE.parent / "public" / "data"
+OUT = PIPELINE.parent / "web" / "public" / "data"
 OUT.mkdir(parents=True, exist_ok=True)
 
 FILES = {

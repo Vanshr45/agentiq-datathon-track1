@@ -1,6 +1,6 @@
 "use client";
 import { useMemo } from "react";
-import Plot, { baseLayout, NEUTRAL, RED, GREEN } from "@/components/Plot";
+import Plot, { baseLayout, useChartColors } from "@/components/Plot";
 import { Kpi, ClusterLabel, Section, Card } from "@/components/ui";
 import { useQuery } from "@/lib/useQuery";
 import { txSql, cbSql, useFilters } from "@/lib/filters";
@@ -11,6 +11,7 @@ const HIGH_RISK_MIN_CB = 5;
 
 export default function Overview() {
   const { filters } = useFilters();
+  const cc = useChartColors();
   const tx = txSql(filters), cb = cbSql(filters);
   const lit = (v: string[]) => v.map((x) => `'${x}'`).join(",") || "''";
 
@@ -79,38 +80,38 @@ export default function Overview() {
           <div className="grid grid-cols-2 gap-4">
             <Card>
               <div className="font-semibold">Daily transaction volume and value</div>
-              <div className="mb-2 text-sm text-slate-600">Daily transaction count {describeTrend(d.rows.map((r) => r.txns))}.</div>
+              <div className="mb-2 text-sm text-muted">Daily transaction count {describeTrend(d.rows.map((r) => r.txns))}.</div>
               <div className="h-[380px]">
                 <Plot
                   data={[
-                    { x: d.days, y: d.rows.map((r) => r.txns), type: "scatter", mode: "lines", line: { color: NEUTRAL }, name: "Transactions",
+                    { x: d.days, y: d.rows.map((r) => r.txns), type: "scatter", mode: "lines", line: { color: cc.neutral }, name: "Transactions",
                       customdata: d.rows.map((r) => `${((r.txns - d.avgTx) / d.avgTx * 100).toFixed(0)}% vs the daily average of ${Math.round(d.avgTx)}`),
                       hovertemplate: "%{x|%d %b}: %{y:,} transactions<br>%{customdata}<extra></extra>", xaxis: "x", yaxis: "y" },
-                    { x: d.days, y: d.rows.map((r) => r.amount), type: "scatter", mode: "lines", line: { color: GREEN }, name: "Amount",
+                    { x: d.days, y: d.rows.map((r) => r.amount), type: "scatter", mode: "lines", line: { color: cc.green }, name: "Amount",
                       customdata: d.rows.map((r) => `${r.txns.toLocaleString()} transactions that day`),
                       hovertemplate: "%{x|%d %b}: Rs %{y:,.0f}<br>%{customdata}<extra></extra>", xaxis: "x2", yaxis: "y2" },
                   ]}
                   layout={{ ...baseLayout, grid: { rows: 2, columns: 1, pattern: "independent", roworder: "top to bottom" }, showlegend: false, hovermode: "x",
                     yaxis: { title: { text: "count" } }, yaxis2: { title: { text: "Rs" } }, xaxis: { matches: "x2", showticklabels: false }, xaxis2: {},
                     annotations: [
-                      { text: "Transactions per day", x: 0.5, y: 1.02, xref: "paper", yref: "paper", showarrow: false, font: { size: 12, color: "#475569" } },
-                      { text: "Successful value per day", x: 0.5, y: 0.44, xref: "paper", yref: "paper", showarrow: false, font: { size: 12, color: "#475569" } },
+                      { text: "Transactions per day", x: 0.5, y: 1.02, xref: "paper", yref: "paper", showarrow: false, font: { size: 12, color: cc.text } },
+                      { text: "Successful value per day", x: 0.5, y: 0.44, xref: "paper", yref: "paper", showarrow: false, font: { size: 12, color: cc.text } },
                     ] }}
                 />
               </div>
             </Card>
             <Card>
               <div className="font-semibold">Failed transactions by day</div>
-              <div className="mb-2 text-sm text-slate-600">
+              <div className="mb-2 text-sm text-muted">
                 Failure rate averaged {pct(d.avgRate)} and {describeTrend(d.rows.map((r) => r.failed_rate))}; the worst day was {dayLabel(d.peak.day)} at {pct(d.peak.failed_rate)}.
               </div>
               <div className="h-[380px]">
                 <Plot
                   data={[
-                    { x: d.days, y: d.rows.map((r) => r.failed), type: "bar", marker: { color: RED }, opacity: 0.55, name: "Failed count",
+                    { x: d.days, y: d.rows.map((r) => r.failed), type: "bar", marker: { color: cc.red }, opacity: 0.55, name: "Failed count",
                       customdata: d.rows.map((r) => `${r.failed} of ${r.txns} failed; period average is ${pct(d.avgRate)}`),
                       hovertemplate: "%{x|%d %b}: %{y} failed<br>%{customdata}<extra></extra>" },
-                    { x: d.days, y: d.rows.map((r) => r.failed_rate), type: "scatter", mode: "lines", line: { color: "#7f1d1d" }, name: "Failed rate", yaxis: "y2",
+                    { x: d.days, y: d.rows.map((r) => r.failed_rate), type: "scatter", mode: "lines", line: { color: cc.redDeep }, name: "Failed rate", yaxis: "y2",
                       hovertemplate: "%{x|%d %b}: %{y:.1%} failure rate<extra></extra>" },
                   ]}
                   layout={{ ...baseLayout, hovermode: "x", legend: { orientation: "h", y: -0.2 },

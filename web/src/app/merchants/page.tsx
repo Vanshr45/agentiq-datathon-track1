@@ -1,6 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
-import Plot, { baseLayout, NEUTRAL, LIGHT } from "@/components/Plot";
+import Plot, { baseLayout, useChartColors } from "@/components/Plot";
 import { Callout, Card, Section } from "@/components/ui";
 import { useQuery } from "@/lib/useQuery";
 import { txSql, cbSql, useFilters } from "@/lib/filters";
@@ -12,6 +12,7 @@ type SortKey = keyof Merchant;
 
 export default function MerchantRisk() {
   const { filters } = useFilters();
+  const cc = useChartColors();
   const lit = filters.categories.map((c) => `'${c}'`).join(",") || "''";
   const overall = useQuery(`select chargeback_to_transaction_ratio as r from kpi_chargebacks`);
   const overallR = (overall.rows?.[0]?.r as number) ?? 0.14;
@@ -53,7 +54,7 @@ export default function MerchantRisk() {
   const shown = showAll ? rows : rows.slice(0, 10);
   const th = (key: SortKey, label: string, right = false) => (
     <th onClick={() => setSort({ key, dir: sort.key === key ? (sort.dir === 1 ? -1 : 1) : -1 })}
-      className={`cursor-pointer select-none px-3 py-2 text-xs font-medium text-slate-600 ${right ? "text-right" : "text-left"}`}>
+      className={`cursor-pointer select-none px-3 py-2 text-xs font-medium text-muted ${right ? "text-right" : "text-left"}`}>
       {label}{sort.key === key ? (sort.dir === 1 ? " ▲" : " ▼") : ""}
     </th>
   );
@@ -71,7 +72,7 @@ export default function MerchantRisk() {
         sub={known.length >= 2 ? `${title(known[0].merchant_category)} has the highest dispute ratio (${known[0].ratio!.toFixed(3)}) and ${title(known[known.length - 1].merchant_category)} the lowest (${known[known.length - 1].ratio!.toFixed(3)}), a ${(known[0].ratio! / known[known.length - 1].ratio!).toFixed(1)}x spread across known categories.` : undefined}>
         <Card><div className="h-[380px]">
           <Plot data={[{ x: cats.map((c) => c.merchant_category), y: cats.map((c) => c.ratio), type: "bar",
-              marker: { color: cats.map((c) => (c.merchant_category === "UNKNOWN" ? LIGHT : NEUTRAL)) },
+              marker: { color: cats.map((c) => (c.merchant_category === "UNKNOWN" ? cc.light : cc.neutral)) },
               text: cats.map((c) => (c.ratio == null ? "" : c.ratio.toFixed(3))), textposition: "outside",
               customdata: cats.map((c) => `${num(c.cbs)} chargebacks against ${num(c.txns)} transactions`),
               hovertemplate: "%{x}: ratio %{y:.3f}<br>%{customdata}<extra></extra>" }]}
@@ -83,11 +84,11 @@ export default function MerchantRisk() {
         sub="Merchants counted by number of chargebacks (both files pooled). The 5 to 12 band is empty: the ordinary population stops at 4 and a separate cluster starts at 13.">
         <Card><div className="h-[300px]">
           <Plot data={[{ x: distRows.map((r) => r.bucket), y: distRows.map((r) => r.merchants), type: "bar",
-              marker: { color: distRows.map((r) => (r.bucket === "13+" ? "#dc2626" : r.bucket === "5-12" ? LIGHT : NEUTRAL)) },
+              marker: { color: distRows.map((r) => (r.bucket === "13+" ? cc.red : r.bucket === "5-12" ? cc.light : cc.neutral)) },
               text: distRows.map((r) => num(r.merchants)), textposition: "outside", hovertemplate: "%{x} chargebacks: %{y} merchants<extra></extra>" }]}
             layout={{ ...baseLayout, xaxis: { title: { text: "chargebacks per merchant" }, type: "category" }, yaxis: { title: { text: "merchants" }, type: "log" } }} />
         </div>
-        <div className="mt-1 text-xs text-slate-500">Log scale. Any floor from 5 to 13 selects the same 28 merchants.</div></Card>
+        <div className="mt-1 text-xs text-faint">Log scale. Any floor from 5 to 13 selects the same 28 merchants.</div></Card>
       </Section>
 
       <Section title="High-risk merchant ledger"
@@ -98,25 +99,25 @@ export default function MerchantRisk() {
         </Callout>
         <Card className="mt-3 overflow-x-auto p-0">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50">
+            <thead className="bg-surface-2">
               <tr>{th("merchant_name", "Merchant")}{th("merchant_category", "Category")}{th("txn_count", "Sample transactions", true)}
                 {th("chargeback_count", "Chargebacks", true)}{th("chargeback_amount", "Disputed amount", true)}{th("ratio", "Ratio", true)}</tr>
             </thead>
             <tbody>
               {shown.map((m) => (
-                <tr key={m.merchant_id} className="border-t border-slate-100">
-                  <td className="px-3 py-2">{m.merchant_name ?? <span className="text-slate-500">Not in merchant master ({m.merchant_id})</span>}</td>
+                <tr key={m.merchant_id} className="border-t border-line-soft">
+                  <td className="px-3 py-2">{m.merchant_name ?? <span className="text-faint">Not in merchant master ({m.merchant_id})</span>}</td>
                   <td className="px-3 py-2">{m.merchant_category}</td>
                   <td className="px-3 py-2 text-right">{m.txn_count}</td>
                   <td className="px-3 py-2 text-right">{m.chargeback_count}</td>
                   <td className="px-3 py-2 text-right">{m.chargeback_amount == null ? "-" : num(m.chargeback_amount)}</td>
-                  <td className={`px-3 py-2 text-right ${m.ratio != null && m.ratio >= threshold ? "font-semibold text-red-700" : ""}`}>{m.ratio == null ? "n/a" : m.ratio.toFixed(2)}</td>
+                  <td className={`px-3 py-2 text-right ${m.ratio != null && m.ratio >= threshold ? "font-semibold text-risk-strong" : ""}`}>{m.ratio == null ? "n/a" : m.ratio.toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </Card>
-        <div className="mt-2 flex items-center gap-3 text-xs text-slate-500">
+        <div className="mt-2 flex items-center gap-3 text-xs text-faint">
           {shown.length < rows.length
             ? <>Showing top {shown.length} of {rows.length} flagged merchants — <button className="underline" onClick={() => setShowAll(true)}>view all</button></>
             : <>Showing all {rows.length} flagged merchants{rows.length !== 28 ? " in the selected categories (28 in total)" : ""}.{rows.length > 10 && <button className="underline" onClick={() => setShowAll(false)}>show top 10</button>}</>}

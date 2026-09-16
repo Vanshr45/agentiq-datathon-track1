@@ -1,13 +1,14 @@
 "use client";
-import Plot, { baseLayout } from "./Plot";
+import Plot, { baseLayout, useChartColors } from "./Plot";
 import type { Plan } from "@/lib/agent";
 import type { Row } from "@/lib/duckdb";
 
-const PALETTE = ["#64748b", "#dc2626", "#16a34a", "#94a3b8", "#f87171", "#4ade80"];
 const isNum = (v: unknown) => typeof v === "number";
 const isDateCol = (name: string, rows: Row[]) => /day|date|_ts|timestamp|time|month|week/i.test(name) && rows.every((r) => isNum(r[name]) && (r[name] as number) > 1e11);
 
 export default function AgentChart({ plan, rows, columns }: { plan: Plan; rows: Row[]; columns: string[] }) {
+  const c = useChartColors();
+  const PALETTE = [c.neutral, c.red, c.green, c.light, c.redDeep, c.text];
   const x = columns.includes(plan.x) ? plan.x : columns[0];
   let y = plan.y.filter((c) => columns.includes(c) && c !== x);
   if (!y.length) y = columns.filter((c) => c !== x && rows.some((r) => isNum(r[c]))).slice(0, 2);

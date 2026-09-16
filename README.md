@@ -50,11 +50,12 @@ Before running the cleaning notebook, place the 4 provided raw files (track1_upi
 The dashboard (Next.js — runs entirely in the browser via DuckDB-WASM, no backend server needed):
 
 ```
+cd web
 npm install
 npm run dev
 ```
 
-For the "Ask the data" agent to work locally, you'll need a free Gemini API key from Google AI Studio. Add it as GEMINI_API_KEY in a .env.local file.
+For the "Ask the data" agent to work locally, you'll need a free Gemini API key from Google AI Studio. Add it as GEMINI_API_KEY in a web/.env.local file.
 
 ## Data dictionary
 
@@ -80,10 +81,7 @@ One more thing worth flagging: some individual merchant ratios go above 1.0 (one
 - /pipeline/data/cleaned — normalized output + cleaning_log.txt (raw vs cleaned row counts, what got flagged and why)
 - /pipeline/notebooks — the cleaning notebook, analytics_layer.py, and export_parquet.py (writes the Parquet files the dashboard loads)
 - /pipeline/requirements.txt — Python dependencies for the pipeline
-- /src/app — the Next.js dashboard pages, plus the Gemini agent endpoint at /src/app/api/ask
-- /src/components — the UI pieces (sidebar, header and filters, KPI cards, charts)
-- /src/lib — DuckDB-WASM setup, the 12 SQL views, filter logic, and the agent's client-side SQL validation
-- /public/data — the cleaned data as Parquet, loaded by the browser
+- /web — the entire Next.js app: dashboard pages under /web/src/app, the Gemini agent route at /web/src/app/api/ask, UI pieces in /web/src/components, DuckDB-WASM setup and the 12 SQL views in /web/src/lib, and the cleaned data as Parquet under /web/public/data
 - METRICS.md — exact formula for every metric on the dashboard
 - DATA_DICTIONARY.md — every column, explained
 

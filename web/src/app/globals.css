@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+/* class-based dark mode: the <html class="dark"> flag is set by the user's toggle (see lib/theme.tsx), never by
+   the OS preference, so the page can't end up half dark and half light the way the old media-query did. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* two palettes, one meaning system: neutral slate for data, red for risk / flagged, green for healthy.
+   every text token below was contrast-checked against the surfaces it sits on (scripts/contrast-check.mjs). */
+:root {
+  color-scheme: light;
+  --page: #f8fafc;          /* slate-50, page background */
+  --surface: #ffffff;       /* cards, tables, sidebar, chart canvases */
+  --surface-2: #f1f5f9;     /* slate-100, table heads / active nav / hovers */
+  --fg: #0f172a;            /* slate-900 */
+  --muted: #475569;         /* slate-600, 7.6:1 on white */
+  --faint: #64748b;         /* slate-500, 4.6:1 on page - the lightest text allowed */
+  --line: #e2e8f0;          /* slate-200 */
+  --line-soft: #f1f5f9;     /* table row dividers */
+
+  --risk-bg: #fef2f2;       /* red-50 callout background */
+  --risk-line: #fecaca;     /* red-200 */
+  --risk-fg: #7f1d1d;       /* red-900, body text inside red callouts */
+  --risk-strong: #b91c1c;   /* red-700, flagged values in tables */
+  --risk-accent: #dc2626;   /* red-600, borders and bars only */
+  --ok-strong: #15803d;     /* green-700, "valid" text */
+  --ok-accent: #16a34a;     /* green-600, borders and bars only */
+  --neutral-accent: #64748b;
+
+  --chart-text: #475569;
+  --chart-grid: #e2e8f0;
+  --chart-neutral: #64748b;
+  --chart-red: #dc2626;
+  --chart-red-deep: #7f1d1d;
+  --chart-green: #16a34a;
+  --chart-light: #cbd5e1;   /* de-emphasised bars (UNKNOWN category, empty bucket) */
+}
+
+.dark {
+  color-scheme: dark;
+  --page: #0f172a;          /* slate-900 */
+  --surface: #1e293b;       /* slate-800 */
+  --surface-2: #263548;
+  --fg: #f1f5f9;            /* slate-100 */
+  --muted: #cbd5e1;         /* slate-300, 9.9:1 on surface */
+  --faint: #94a3b8;         /* slate-400, 5.7:1 on surface, 4.9:1 on surface-2 */
+  --line: #334155;          /* slate-700 */
+  --line-soft: #2b3a4f;
+
+  --risk-bg: #3b1414;
+  --risk-line: #7f1d1d;
+  --risk-fg: #fecaca;       /* red-200, 11:1 on risk-bg */
+  --risk-strong: #f87171;   /* red-400, 5.3:1 on surface */
+  --risk-accent: #ef4444;
+  --ok-strong: #4ade80;     /* green-400, 8.4:1 on surface */
+  --ok-accent: #22c55e;
+  --neutral-accent: #94a3b8;
+
+  --chart-text: #cbd5e1;
+  --chart-grid: #334155;
+  --chart-neutral: #94a3b8;
+  --chart-red: #f87171;
+  --chart-red-deep: #fca5a5;
+  --chart-green: #4ade80;
+  --chart-light: #475569;
+}
+
+@theme inline {
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-risk-bg: var(--risk-bg);
+  --color-risk-line: var(--risk-line);
+  --color-risk-fg: var(--risk-fg);
+  --color-risk-strong: var(--risk-strong);
+  --color-risk-accent: var(--risk-accent);
+  --color-ok-strong: var(--ok-strong);
+  --color-ok-accent: var(--ok-accent);
+  --color-neutral-accent: var(--neutral-accent);
+}
+
+body {
+  background: var(--page);
+  color: var(--fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+table, td, th {
+  color: inherit;
+}
+
+/* native date inputs pick up the surface, not the browser default white */
+input[type="date"] {
+  background: var(--surface);
+  color: var(--fg);
+}

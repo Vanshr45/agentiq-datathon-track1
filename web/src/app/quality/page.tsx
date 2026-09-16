@@ -49,16 +49,16 @@ export default function DataQuality() {
       <Section title="Join coverage by key" sub="Share of rows in the left table that find a match in the right table, computed in the browser when the data loads.">
         <Card className="overflow-x-auto p-0">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50"><tr>
+            <thead className="bg-surface-2"><tr>
               {["Left table", "Key", "Right table", "Left rows", "Matched rows", "Match rate"].map((h, k) => (
-                <th key={h} className={`px-3 py-2 text-xs font-medium text-slate-600 ${k >= 3 ? "text-right" : "text-left"}`}>{h}</th>))}
+                <th key={h} className={`px-3 py-2 text-xs font-medium text-muted ${k >= 3 ? "text-right" : "text-left"}`}>{h}</th>))}
             </tr></thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.left_table + r.right_table} className="border-t border-slate-100">
+                <tr key={r.left_table + r.right_table} className="border-t border-line-soft">
                   <td className="px-3 py-2">{r.left_table}</td><td className="px-3 py-2 font-mono text-xs">{r.key}</td><td className="px-3 py-2">{r.right_table}</td>
                   <td className="px-3 py-2 text-right">{num(r.left_rows)}</td><td className="px-3 py-2 text-right">{num(r.matched_rows)}</td>
-                  <td className={`px-3 py-2 text-right ${r.match_rate < 0.5 ? "font-semibold text-red-700" : ""}`}>{pct(r.match_rate)}</td>
+                  <td className={`px-3 py-2 text-right ${r.match_rate < 0.5 ? "font-semibold text-risk-strong" : ""}`}>{pct(r.match_rate)}</td>
                 </tr>))}
             </tbody>
           </table>

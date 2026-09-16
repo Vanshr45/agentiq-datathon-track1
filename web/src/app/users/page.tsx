@@ -7,7 +7,7 @@ import { num } from "@/lib/format";
 type User = { user_id: string; chargeback_count: number; disputed_amount: number | null; merchants_disputed: number; kyc_status: string; risk_segment: string; pan_valid: boolean | null; aadhaar_valid: boolean | null; risk_reason: string };
 type Cluster = { user_id: string; txns_in_cluster: number; span_hours: number; total_amount: number; first_txn: number; txn_ids: string; kyc_status: string; risk_segment: string };
 
-const Flag = ({ v }: { v: boolean | null }) => v == null ? <span className="text-slate-500">-</span> : v ? <span className="text-green-700">valid</span> : <span className="font-medium text-red-700">invalid</span>;
+const Flag = ({ v }: { v: boolean | null }) => v == null ? <span className="text-faint">-</span> : v ? <span className="text-ok-strong">valid</span> : <span className="font-medium text-risk-strong">invalid</span>;
 
 export default function UserRisk() {
   const { filters } = useFilters();
@@ -47,13 +47,13 @@ export default function UserRisk() {
       <Section title="High-risk users" sub="Top 20 by chargeback count. Only validity flags are shown for identity documents, never the values. Filtered by KYC status and risk segment.">
         <Card className="overflow-x-auto p-0">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50"><tr>
+            <thead className="bg-surface-2"><tr>
               {["User", "Chargebacks", "Disputed amount", "Merchants disputed", "KYC status", "Risk segment", "PAN", "Aadhaar", "Reason"].map((h, i) => (
-                <th key={h} className={`px-3 py-2 text-xs font-medium text-slate-600 ${i >= 1 && i <= 3 ? "text-right" : "text-left"}`}>{h}</th>))}
+                <th key={h} className={`px-3 py-2 text-xs font-medium text-muted ${i >= 1 && i <= 3 ? "text-right" : "text-left"}`}>{h}</th>))}
             </tr></thead>
             <tbody>
               {all.slice(0, 20).map((u) => (
-                <tr key={u.user_id} className="border-t border-slate-100">
+                <tr key={u.user_id} className="border-t border-line-soft">
                   <td className="px-3 py-2 font-mono text-xs">{u.user_id}</td>
                   <td className="px-3 py-2 text-right">{u.chargeback_count}</td>
                   <td className="px-3 py-2 text-right">{u.disputed_amount == null ? "-" : num(u.disputed_amount)}</td>
@@ -74,13 +74,13 @@ export default function UserRisk() {
         {cl.length === 0 ? <Card>No clusters in the current filter.</Card> : (
           <Card className="overflow-x-auto p-0">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50"><tr>
+              <thead className="bg-surface-2"><tr>
                 {["User", "Transactions", "Span (hours)", "Total amount", "First transaction", "Transaction ids", "KYC status", "Risk segment"].map((h, i) => (
-                  <th key={h} className={`px-3 py-2 text-xs font-medium text-slate-600 ${i >= 1 && i <= 3 ? "text-right" : "text-left"}`}>{h}</th>))}
+                  <th key={h} className={`px-3 py-2 text-xs font-medium text-muted ${i >= 1 && i <= 3 ? "text-right" : "text-left"}`}>{h}</th>))}
               </tr></thead>
               <tbody>
                 {cl.map((c) => (
-                  <tr key={c.user_id} className={`border-t border-slate-100 ${c.span_hours < 24 ? "font-semibold text-red-700" : ""}`}>
+                  <tr key={c.user_id} className={`border-t border-line-soft ${c.span_hours < 24 ? "font-semibold text-risk-strong" : ""}`}>
                     <td className="px-3 py-2 font-mono text-xs">{c.user_id}</td>
                     <td className="px-3 py-2 text-right">{c.txns_in_cluster}</td>
                     <td className="px-3 py-2 text-right">{c.span_hours}</td>
@@ -93,7 +93,7 @@ export default function UserRisk() {
               </tbody>
             </table>
           </Card>)}
-        <div className="mt-2 text-xs text-slate-500">{cl.length} clusters, {cl.reduce((s, c) => s + c.txns_in_cluster, 0)} transactions; {cl.filter((c) => c.span_hours < 24).length} span under 24 hours.</div>
+        <div className="mt-2 text-xs text-faint">{cl.length} clusters, {cl.reduce((s, c) => s + c.txns_in_cluster, 0)} transactions; {cl.filter((c) => c.span_hours < 24).length} span under 24 hours.</div>
       </Section>
     </div>
   );
