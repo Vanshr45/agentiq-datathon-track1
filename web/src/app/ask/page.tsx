@@ -28,7 +28,7 @@ export default function Ask() {
   return (
     <div>
       <Section title="Ask the data"
-        sub="Plain-English questions are turned into a read-only DuckDB query by Gemini, validated in your browser, and run against the in-browser data. The page filters above do not apply here.">
+        sub="Plain-English questions are turned into a read-only DuckDB query by Llama on Groq, validated in your browser, and run against the in-browser data. The page filters above do not apply here.">
         <div className="flex flex-wrap gap-2">
           {EXAMPLES.map((e) => <button key={e} onClick={() => submit(e)} disabled={busy} className="rounded-md border border-line bg-surface px-3 py-1.5 text-sm hover:bg-surface-2 disabled:opacity-50">{e}</button>)}
         </div>
@@ -37,7 +37,7 @@ export default function Ask() {
             className="flex-1 rounded-md border border-line bg-surface px-3 py-2 text-sm focus:border-risk-accent focus:outline-none" />
           <button type="submit" disabled={busy || duck.status !== "ready"} className="rounded-md bg-fg px-4 py-2 text-sm text-page disabled:opacity-50">{busy ? "Thinking..." : "Ask"}</button>
         </form>
-        {busy && <div className="mt-2 text-xs text-faint">Two model calls on the free tier; usually 5 to 15 seconds, up to a minute if Gemini is busy.</div>}
+        {busy && <div className="mt-2 text-xs text-faint">Two model calls; usually a few seconds, longer if Groq is rate limited.</div>}
       </Section>
 
       <div className="mt-6 space-y-4">

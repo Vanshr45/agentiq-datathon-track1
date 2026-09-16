@@ -18,7 +18,7 @@ Everything below is organized the same way I actually built it — in stages, ma
 | Stage 1 — Data Rescue (Core) | Cleaning all 4 raw files: fixing IDs, amounts, dates, status values; handling duplicates and broken relationships | Done |
 | Stage 2 — Analytics Layer (Core) | DuckDB views for every business metric (revenue, chargeback ratio, risk scores), with every formula documented | Done |
 | Stage 3 — Executive Dashboard (Core) | Interactive dashboard — KPIs, filters, trend charts, high-risk merchant/user tables, a dedicated data-quality section | Done |
-| Stage 4 — Bonus: Agentic Graph AI | Natural-language question → validated SQL → correct chart type → plain-language summary, powered by Gemini | Done |
+| Stage 4 — Bonus: Agentic Graph AI | Natural-language question → validated SQL → correct chart type → plain-language summary, powered by Llama on Groq | Done |
 | Stage 5 — Documentation & Polish | README, data dictionary, metrics reference, fresh-clone reproducibility check, demo materials | Done |
 
 This mirrors the datathon's own structure: Data Rescue and Analytics Layer and Executive Dashboard were the three core layers, and the Agentic Graph AI was the optional bonus layer on top. I did all four, plus the setup and documentation stages around them.
@@ -55,7 +55,7 @@ npm install
 npm run dev
 ```
 
-For the "Ask the data" agent to work locally, you'll need a free Gemini API key from Google AI Studio. Add it as GEMINI_API_KEY in a web/.env.local file.
+For the "Ask the data" agent to work locally, you'll need a free Groq API key from console.groq.com. Add it as GROQ_API_KEY in a web/.env.local file. Groq's inference is fast (their LPU stack typically answers in a couple of seconds even on the free tier), so the two model calls per question land quicker than Gemini's free tier did.
 
 ## Data dictionary
 
@@ -81,7 +81,7 @@ One more thing worth flagging: some individual merchant ratios go above 1.0 (one
 - /pipeline/data/cleaned — normalized output + cleaning_log.txt (raw vs cleaned row counts, what got flagged and why)
 - /pipeline/notebooks — the cleaning notebook, analytics_layer.py, and export_parquet.py (writes the Parquet files the dashboard loads)
 - /pipeline/requirements.txt — Python dependencies for the pipeline
-- /web — the entire Next.js app: dashboard pages under /web/src/app, the Gemini agent route at /web/src/app/api/ask, UI pieces in /web/src/components, DuckDB-WASM setup and the 12 SQL views in /web/src/lib, and the cleaned data as Parquet under /web/public/data
+- /web — the entire Next.js app: dashboard pages under /web/src/app, the Groq agent route at /web/src/app/api/ask, UI pieces in /web/src/components, DuckDB-WASM setup and the 12 SQL views in /web/src/lib, and the cleaned data as Parquet under /web/public/data
 - METRICS.md — exact formula for every metric on the dashboard
 - DATA_DICTIONARY.md — every column, explained
 
